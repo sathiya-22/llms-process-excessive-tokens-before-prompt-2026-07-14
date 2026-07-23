@@ -47,15 +47,20 @@ def estimate_tokens(texts_or_files, is_file, encoding):
             content = item
             items_processed.append(f"Text: '{item[:50]}...'") # Show first 50 chars for text
 
-        tokens = num_tokens_from_string(content, encoding_name=encoding)
-        click.echo(f"'{item_name}' contains {tokens} tokens (using encoding: {encoding}).")
+        try:
+            encoding = tiktoken.get_encoding(encoding)
+        except KeyError:
+            click.echo(f"Error: Invalid encoding name '{encoding}'.", err=True)
+            continue
+
+        tokens = num_tokens_from_string(content, encoding_name=encoding.name)
+        click.echo(f"'{item_name}' contains {tokens} tokens (using encoding: {encoding.name}).")
         total_tokens += tokens
 
     click.echo("\n--- Summary ---")
     click.echo(f"Total tokens across all inputs: {total_tokens}")
     click.echo(f"Inputs processed: {len(items_processed)}")
-    click.echo(f"Encoding used: {encoding}")
-
+    click.echo(f"Encoding used: {encoding.name}")
 
 if __name__ == '__main__':
     estimate_tokens()
